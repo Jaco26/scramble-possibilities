@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Reduce</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <style>
+
+      .result {
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        text-shadow: 3px, 2px black;
+        font-size: 60px;
+      }
+
+      .jumbotron {
+        background-color: aquamarine
+      }
+    
+    </style>
+
+  </head>
+  <body>
+
+    <div id="app" v-cloak>
+    
+      <div class="jumbotron jumbotron-fluid ">
+        <div class="text-center">
+          <h1>
+            Can You Make This
+            <span class="text-secondary">
+              With That
+            </span>
+          </h1>
+        </div>
+        
+      </div>
+    
+      <div class="container-fluid">
+        <div class="col-12">
+          <form @submit.prevent="canYouMakeThisWithThat">
+            <div class="form-group col-12">
+              <label for="testIn">Can you make this...</label>
+              <input type="text" class="form-control-lg" id="testIn" v-model="test">
+            </div>
+            <div class="form-group col-12">
+              <label for="againstIn">...with this?</label>
+              <textarea rows="3" type="text" class="form-control-lg" id="againstIn" v-model="against"></textarea>
+            </div>
+            <button class="btn btn-secondary col-12 p-3">Submit</button>
+          </form>
+        </div>
+        
+        <div class="row">
+          <h1 class="result" :style="myStyle"> {{result}} </h1>
+        </div>
+
+      </div>
+    </div>
+
+    <script>
+      const app = new Vue({
+        el: '#app',
+        data: {
+          test: '',
+          against: '',
+          result: null,
+        },
+        methods: {
+          canYouMakeThisWithThat: function () {
+            let testStringObjArray = [this.test, this.against].reduce((a, b) => {
+              a.push(b.toLowerCase().replace(' ', '').split('')
+                .reduce((accum, item) => {
+                  if (!accum[item]) {
+                    accum[item] = 1;
+                  } else {
+                    accum[item] += 1;
+                  }
+                  return accum;
+                }, {}));
+              return a
+            }, []);
+            let testObj = testStringObjArray[0];
+            let againstObj = testStringObjArray[1];
+            let result = [];
+            let testKeys = Object.keys(testObj);
+            for (let prop in againstObj) {
+              if (testObj[prop] <= againstObj[prop]) {
+                result.push(prop);
+              }
+            }            
+            this.result = result.length == testKeys.length;
+          }
+        },
+        computed: {
+          myStyle: function () {
+            if (this.result) {
+              return {
+                color: '#66dd99',
+              } 
+            } else {
+              return {
+                color: '#ff5555',
+              }
+            }
+          }
+        },
+      
+      });
+    </script>
+
+  </body>
+</html>
