@@ -16,7 +16,7 @@
       }
 
       .jumbotron {
-        background-color: aquamarine
+        background-color: rgb(160, 248, 219)
       }
     
     </style>
@@ -39,8 +39,8 @@
       </div>
     
       <div class="container-fluid">
-        <div class="col-12">
-          <form @submit.prevent="canYouMakeThisWithThat">
+        <form @submit.prevent="final">
+          <div class="row justify-content-center">
             <div class="form-group col-12">
               <label for="testIn">Can you make this...</label>
               <input type="text" class="form-control-lg" id="testIn" v-model="test">
@@ -49,14 +49,19 @@
               <label for="againstIn">...with this?</label>
               <textarea rows="3" type="text" class="form-control-lg" id="againstIn" v-model="against"></textarea>
             </div>
-            <button class="btn btn-secondary col-12 p-3">Submit</button>
-          </form>
-        </div>
-        
-        <div class="row">
-          <h1 class="result" :style="myStyle"> {{result}} </h1>
-        </div>
+          </div>
+            <button v-if="!isComputing" class="btn btn-secondary col-xs-12 p-3"> Submit</button>
+            
+            <div v-if="isComputing">
+              <h1>...COMPUTING...</h1>
+            </div>
+            <div class="row" v-if="!isComputing">
+              <h1 class="result" :style="myStyle"> {{result}} </h1>
+            </div>
+          
+            
 
+        </form>
       </div>
     </div>
 
@@ -67,17 +72,14 @@
           test: '',
           against: '',
           result: null,
+          isComputing: false,
         },
         methods: {
           canYouMakeThisWithThat: function () {
             let testStringObjArray = [this.test, this.against].reduce((a, b) => {
               a.push(b.toLowerCase().replace(' ', '').split('')
                 .reduce((accum, item) => {
-                  if (!accum[item]) {
-                    accum[item] = 1;
-                  } else {
-                    accum[item] += 1;
-                  }
+                  accum[item] ? accum[item] += 1 : accum[item] = 1;
                   return accum;
                 }, {}));
               return a
@@ -90,9 +92,18 @@
               if (testObj[prop] <= againstObj[prop]) {
                 result.push(prop);
               }
-            }            
-            this.result = result.length == testKeys.length;
+            }
+            let vm = this
+            setTimeout(function() {
+              vm.result = result.length == testKeys.length;
+              vm.isComputing = false;
+            }, 1000)            
+          },
+          final: async function () {
+            this.isComputing = true;      
+            await this.canYouMakeThisWithThat();
           }
+
         },
         computed: {
           myStyle: function () {
@@ -105,7 +116,8 @@
                 color: '#ff5555',
               }
             }
-          }
+          },
+          
         },
       
       });
